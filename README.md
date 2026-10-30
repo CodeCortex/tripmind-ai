@@ -46,7 +46,7 @@ Follow its README for installation and configuration. Tool availability depends 
 
 ## 🛠️ Tech Stack
 
-`Python` · `Streamlit` · `LangGraph` · `LangChain` · `Groq` · `MCP` · `Tavily` · `OpenWeather` · `AviationStack` · `PostgreSQL` · `Docker`
+`Python` · `Streamlit` · `LangGraph` · `LangChain` · `Groq` · `MCP` · `Tavily` · `OpenWeather` · `AviationStack` · `PostgreSQL`
 
 ## 🚀 Run Locally
 
@@ -54,7 +54,7 @@ Follow its README for installation and configuration. Tool availability depends 
 git clone https://github.com/CodeCortex/tripmind-ai.git
 cd tripmind-ai
 
-python3 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
@@ -81,15 +81,6 @@ streamlit run frontend.py
 
 Open [http://localhost:8501](http://localhost:8501).
 
-## 🐳 Run with Docker
-
-Configure `.env` and set `DATABASE_URL` to use the Compose service hostname `postgres`, then run:
-
-```bash
-docker compose up --build -d
-```
-
-Open [http://localhost:8501](http://localhost:8501).
 
 ## 📸 Application Preview
 
@@ -97,20 +88,20 @@ Open [http://localhost:8501](http://localhost:8501).
 |---|---|
 | ![Dashboard](docs/01.png) | ![Agent workflow](docs/02.png) |
 
-| Research results | Human approval |
+|  Human approval | Research results |
 |---|---|
 | ![Human approval](docs/03.png) | ![Research results](docs/04.png) |
 
 ## 🔍 Engineering Concepts
 
-**LangGraph state management · MCP tool integration · Human-in-the-loop workflows · PostgreSQL checkpointing · LLM orchestration · Logging and error handling**
+**LangGraph state management · Prompt engineering · MCP tool integration · Human-in-the-loop workflows · PostgreSQL checkpointing · LLM orchestration · Logging and error handling**
 
 > Travel prices, availability, and generated budgets are estimates unless verified by a live provider. Keep API keys in `.env` and never commit secrets.
 
 ## 👨‍💻 Author
 
 **Roshan Jaiswal**  
-GenAI Engineer · Agentic AI · Python · LangGraph · MCP · LLM Applications
+GenAI Software Engineer · Agentic AI · Python · LangGraph · MCP · LLM Applications
 
 ---
 
