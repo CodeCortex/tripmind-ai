@@ -1,284 +1,117 @@
-# ✈️ Tripmind AI --- Multi-Agent Travel Planner
+# ✈️ Tripmind AI
 
-> A real-world GenAI travel-planning application built with **LangGraph,
-> Groq, MCP, Streamlit, and PostgreSQL**. It coordinates specialist
-> agents to research a trip, estimate its budget, draft an itinerary,
-> and request human approval before producing the final plan.
+**An Agentic AI travel planner powered by LangGraph, Groq, MCP, Streamlit, and PostgreSQL.**
+
+Tripmind AI turns a natural-language travel request into a researched trip plan. Specialist agents gather travel information, estimate costs, build an itinerary, and pause for human approval before generating the final response.
 
 ![Tripmind AI Architecture](docs/architecture.png)
 
-## ✨ Overview
+## ✨ Highlights
 
-Tripmind AI turns a natural-language travel request into a structured
-travel plan. A LangGraph workflow coordinates specialist agents, shares
-state between steps, calls external tools through the Model Context
-Protocol (MCP), and pauses for human review before finalizing the
-response.
+- **Multi-agent orchestration:** LangGraph supervisor validates requests, extracts constraints, and coordinates specialist agents.
+- **Specialist agents:** Flight, Hotel, Weather, Budget, and Itinerary.
+- **MCP tool integration:** Connects external research and weather services through the Model Context Protocol.
+- **Budget reasoning:** Estimates trip costs and highlights potential budget issues.
+- **Human-in-the-loop:** Approve a draft itinerary or request changes before finalization.
+- **Persistent state:** PostgreSQL checkpointer with an in-memory fallback for local development.
+- **Observability:** Centralized Python logging with rotating log files.
+- **Interactive dashboard:** Streamlit interface for research results, agent status, approval, and final plans.
 
-Example request:
+## 🧠 Agent Workflow
 
-> Plan a 7-day Japan trip under ₹2 lakh from Mumbai. I prefer budget
-> hotels, public transport, and no overnight flights.
+| Agent | Role |
+|---|---|
+| Supervisor | Validates travel intent, extracts constraints, and routes the request |
+| Flight | Provides flight guidance and estimates |
+| Hotel | Researches accommodation options |
+| Weather | Retrieves current conditions and forecasts |
+| Budget | Estimates costs and checks budget feasibility |
+| Itinerary | Creates a day-by-day draft |
+| Human Approval | Pauses for approval or revision feedback |
+| Final Response | Produces the final travel plan |
 
-## 🧩 Key Features
+## 🔌 MCP Integrations
 
--   **Multi-agent orchestration:** LangGraph `StateGraph` coordinates
-    the workflow.
--   **Supervisor and guardrail:** Validates travel intent, extracts
-    constraints, and selects specialist agents.
--   **Specialist agents:** Flight, Hotel, Weather, Budget, and
-    Itinerary.
--   **MCP integrations:** External tools are exposed through the Model
-    Context Protocol.
--   **Budget reasoning:** Estimates trip costs and highlights
-    affordability concerns. Estimates are not confirmed quotes.
--   **Human-in-the-loop:** LangGraph interrupt pauses the workflow so a
-    user can approve a draft or request changes.
--   **Persistent workflow state:** PostgreSQL checkpointer when
-    `DATABASE_URL` is configured; `MemorySaver` fallback for local
-    development.
--   **Observability:** Python logging to the console and rotating
-    `logs/tripmind.log`.
--   **Streamlit dashboard:** Displays constraints, agent status,
-    research outputs, budget, itinerary, approval, and final response.
-
-
-## 🏗️ Architecture
-
-
-``` text
-Traveler
-   |
-   v
-Streamlit Frontend
-   |
-   v
-LangGraph Supervisor
-   |-- validates travel intent
-   |-- extracts trip constraints
-   |-- selects agents
-   |
-   v
-Flight Agent
-   |
-   v
-Hotel Agent ------> Tavily MCP
-   |
-   v
-Weather Agent ----> Weather MCP ----> OpenWeather API
-   |
-   v
-Budget Agent
-   |
-   v
-Itinerary Agent
-   |
-   v
-Human Approval
-   | approved / changes requested
-   v
-Final Response
-```
-
-### Agent responsibilities
-
-  -----------------------------------------------------------------------
-  Agent                               Responsibility
-  ----------------------------------- -----------------------------------
-  Supervisor                          Validates travel intent, extracts
-                                      constraints, and selects agents
-
-  Flight Agent                        Provides flight guidance and
-                                      airfare estimates; live data
-                                      depends on the configured provider
-                                      and implementation
-
-  Hotel Agent                         Researches accommodation options
-                                      using Tavily search
-
-  Weather Agent                       Retrieves current weather and
-                                      forecast information
-
-  Budget Agent                        Estimates costs and assesses budget
-                                      feasibility
-
-  Itinerary Agent                     Creates a day-by-day draft
-                                      itinerary
-
-  Human Approval                      Pauses for approval or revision
-                                      feedback
-
-  Final Response                      Produces the final or revised
-                                      travel response
-  -----------------------------------------------------------------------
-
-### MCP integrations
-
-  -----------------------------------------------------------------------
-  MCP server              Transport / role        Provider
-  ----------------------- ----------------------- -----------------------
-  Tavily MCP              Remote Streamable HTTP  Web search and research
-
-  Weather MCP             Local stdio Python      OpenWeather current
-                          server                  weather and forecast
-
-  AviationStack MCP       Local stdio Python      Aviation data tools;
-                          package                 availability depends on
-                                                  subscription and
-                                                  whether the workflow
-                                                  invokes those tools
-  -----------------------------------------------------------------------
-
-### AviationStack MCP setup
+- **Tavily MCP** — web research
+- **Weather MCP** — weather and forecast data via OpenWeather
+- **AviationStack MCP** — aviation tools, subject to API-plan access and workflow integration
 
 Clone the AviationStack MCP repository:
 
-``` bash
+```bash
 git clone https://github.com/Pradumnasaraf/aviationstack-mcp.git
 ```
 
-This creates an `aviationstack-mcp/` directory. Follow that repository's
-README for its dependencies, configuration, and supported tools. Ensure
-the Python environment used by `mcp_client.py` can import
-`aviationstack_mcp`.
+Follow its README for installation and configuration. Tool availability depends on your AviationStack subscription.
 
+## 🛠️ Tech Stack
 
-## 🛠️ Technology Stack
+`Python` · `Streamlit` · `LangGraph` · `LangChain` · `Groq` · `MCP` · `Tavily` · `OpenWeather` · `AviationStack` · `PostgreSQL` · `Docker`
 
-  -----------------------------------------------------------------------
-  Layer                               Technologies
-  ----------------------------------- -----------------------------------
-  Language                            Python
+## 🚀 Run Locally
 
-  Frontend                            Streamlit
-
-  Agent orchestration                 LangGraph
-
-  LLM integration                     LangChain, Groq
-
-  Model                               Configurable using `GROQ_MODEL`;
-                                      current config default is
-                                      `openai/gpt-oss-120b`
-
-  Tool integration                    MCP, `langchain-mcp-adapters`
-
-  Web research                        Tavily
-
-  Weather                             OpenWeather API
-
-  Flight data integration             AviationStack MCP, subject to
-                                      plan/tool availability
-
-  Workflow persistence                PostgreSQL, LangGraph Postgres
-                                      checkpointer
-
-  Local fallback                      LangGraph MemorySaver
-
-  Logging                             Python `logging`, rotating file
-                                      handler
-  -----------------------------------------------------------------------
-
-
-## ⚙️ Prerequisites
-
--   Python 3.12 or a compatible version supported by the installed
-    dependencies
--   Git
--   Groq API key
--   Tavily API key
--   OpenWeather API key
--   AviationStack API key if using its MCP tools
--   PostgreSQL for persistent LangGraph checkpoints (optional for local
-    development)
-
-## 🚀 Local Setup
-
-### 1. Clone your Tripmind AI repository
-
-``` bash
+```bash
 git clone https://github.com/CodeCortex/tripmind-ai.git
 cd tripmind-ai
-```
 
-
-### 2. Create and activate a virtual environment
-
-``` bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
 
-### 3. Install dependencies
-
-``` bash
-python -m pip install --upgrade pip
 pip install -r requirements.txt
-```
-
-To clone and work with AviationStack MCP locally:
-
-``` bash
-git clone https://github.com/Pradumnasaraf/aviationstack-mcp.git
-```
-
-### 4. Configure environment variables
-
-``` bash
 cp .env.example .env
 ```
 
-``` dotenv
-GROQ_API_KEY=your_groq_api_key
-GROQ_MODEL=openai/gpt-oss-120b
+Add your API keys to `.env` (use the variable names expected by `config.py`):
 
+```dotenv
+GROQ_API_KEY=your_groq_api_key
 TAVILY_API_KEY=your_tavily_api_key
 OPENWEATHER_API_KEY=your_openweather_api_key
 AVIATION_STACK_API_KEY=your_aviationstack_api_key
 
-# Optional: persistent LangGraph checkpoint database
-DATABASE_URL=
-
+# Optional: PostgreSQL checkpoint persistence
+DATABASE_URL=postgresql://username:password@localhost:5432/tripmind
 ```
 
+Start the application:
 
-### 5. Run the application
-
-``` bash
+```bash
 streamlit run frontend.py
 ```
 
-Open `http://localhost:8501`.
+Open [http://localhost:8501](http://localhost:8501).
 
-![OUTPUT1](docs/01.png)
-![OUTPUT2](docs/02.png)
-![OUTPUT3](docs/03.png)
-![OUTPUT4](docs/04.png)
-![OUTPUT5](docs/05.png)
+## 🐳 Run with Docker
 
+Configure `.env` and set `DATABASE_URL` to use the Compose service hostname `postgres`, then run:
 
-## 📊 Logging and Observability
+```bash
+docker compose up --build -d
+```
 
-The application uses centralized Python logging:
+Open [http://localhost:8501](http://localhost:8501).
 
--   Rotating file output at `logs/tripmind.log`.
+## 📸 Application Preview
 
-## 🧑‍💻 Human-in-the-Loop Workflow
+| Travel dashboard | Agent workflow |
+|---|---|
+| ![Dashboard](docs/01.png) | ![Agent workflow](docs/02.png) |
 
-The Itinerary Agent creates a draft. The Human Approval node uses a
-LangGraph interrupt to pause execution. The user can:
+| Research results | Human approval |
+|---|---|
+| ![Human approval](docs/03.png) | ![Research results](docs/04.png) |
 
-1.  Approve the draft and continue to the final response.
-2.  Request changes and provide feedback.
+## 🔍 Engineering Concepts
 
-The frontend resumes the workflow using the same `thread_id`. The checkpointer preserves the
-interrupted graph state so execution can continue.
+**LangGraph state management · MCP tool integration · Human-in-the-loop workflows · PostgreSQL checkpointing · LLM orchestration · Logging and error handling**
+
+> Travel prices, availability, and generated budgets are estimates unless verified by a live provider. Keep API keys in `.env` and never commit secrets.
 
 ## 👨‍💻 Author
 
-**Roshan Jaiswal**
+**Roshan Jaiswal**  
+GenAI Engineer · Agentic AI · Python · LangGraph · MCP · LLM Applications
 
-GenAI • Agentic AI • Python • LangGraph • MCP • RAG • LLM Applications
+---
 
-------------------------------------------------------------------------
-
-If you find this project useful, consider giving the repository a ⭐.
+If you find this project interesting, consider giving the repository a ⭐.
