@@ -5,3 +5,8 @@ pip install langgraph langchain langchain-openai langchain-groq langchain-commun
 pip freeze > requirements.txt  
 
 
+
+
+python -m py_compile agents.py frontend.py
+
+streamlit run frontend.py
