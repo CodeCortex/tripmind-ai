@@ -10,6 +10,7 @@ class TravelState(TypedDict, total=False):
     trip_constraints: dict[str, Any]
     selected_agents: list[str]
     supervisor_reasoning: str
+    request_allowed: bool
 
     flight_results: str
     hotel_results: str
