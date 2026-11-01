@@ -1,11 +1,14 @@
 
 import sys
+import logging
 
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 from config import (AVIATION_STACK_API_KEY, OPENWEATHER_API_KEY, TAVILY_API_KEY)
+from logging_config import logger
 
+log = logging.getLogger(__name__)
 
 if not AVIATION_STACK_API_KEY:
     raise RuntimeError("AVIATION_STACK_API_KEY is missing from .env")
@@ -52,6 +55,7 @@ async def get_tools():
             _tools_cache= await client.get_tools()
             
         except Exception as e:
+            log.exception("Failed to load MCP tools")
             print()
             print("="*65)
             print("FULL ERROR")
@@ -70,6 +74,7 @@ async def get_tools():
  
 
 async def call_tool(tool_name: str, args: dict = None):
+    log.info("MCP tool call started | tool=%s", tool_name)
     tools = await get_tools()
 
     tool = next(
@@ -79,11 +84,18 @@ async def call_tool(tool_name: str, args: dict = None):
 
     if tool is None:
         available = [item.name for item in tools]
+        log.error("MCP tool not found | requested=%s | available=%s", tool_name, available)
         raise ValueError(
             f"Tool '{tool_name}' not found. Available tools: {available}"
         )
 
-    return await tool.ainvoke(args or {})
+    try:
+        result = await tool.ainvoke(args or {})
+        log.info("MCP tool call completed | tool=%s", tool_name)
+        return result
+    except Exception:
+        log.exception("MCP tool call failed | tool=%s", tool_name)
+        raise
 
 
 
